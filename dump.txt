@@ -1,2 +1,13 @@
 https://ics.uci.edu/~shz/courses/cs114/docs/proj3/index.html
 https://github.com/gilberttang/CS-114-Projects-in-Advanced-3D-Computer-Graphics/blob/master/Cloth%20Simulation/proj3_sim.js
+
+
+Fixed
+rotate
+resolution
+mesh resolution
+animated
+
+
+
+//control for wind velocity and angle

@@ -1,27 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    body {
+        background-color: #4522b8;
+    }
 
-<head>
-    <title>WebGL Setup</title>
-    <link rel="stylesheet" href="css/triangle.css">
-</head>
+    canvas {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        background-color: rgba(255, 255, 255, 0);
+    }
 
+    m{
+        color: #ffffff;
+        position: absolute;
+        text-align: center;
+        left: 45%;
+        bottom: 10%;
+    }
+</style>
+
+<title> WebGL Tearable Cloth </title>
 <body>
-    <div class="container">
-        <h1>Cloth Simulation</h1>
-        <h3>With Mass-Spring System</h3>
-        <div class="box">
-            <canvas id="webgl-canvas"></canvas>
-        </div>
-    </div>
-    <!-- Debugging Help -->
-    <script type="text/javascript" src="js/webgl-debug.js"></script>
-    <script type="text/javascript" src="js/debug-utils.js"></script>
+    <m>
+        R-Reset<br>G-Gravity<br>T-Texture
+    </m>
+    <canvas></canvas>
+    <script>
+        let fetchHTTP = function (url, method) {
+            var request = new XMLHttpRequest(),
+                response;
 
-    <!-- Main Script -->
-    <script type="text/javascript" src="proj3_sim.js"></script>
-    <script type="module" src="js/main.js"></script>
+            request.onreadystatechange = function () {
+                if (request.readyState === 4 && request.status === 200) {
+                    response = request.responseText;
+                }
+            }
+            request.open(method ? method : 'GET', url, false);
+            request.overrideMimeType("text/plain");
+            request.send(null);
+            return response;
+        };
 
+        // Provides requestAnimationFrame in a cross browser way.
+        window.requestAnimFrame =
+            window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function (callback) {
+                window.setTimeout(callback, 1e3 / 60);
+            };
+    </script>
+    <script src="lib/stats.min.js"></script>
+    <script src="js/main.js"></script>
 </body>
-
-</html>
