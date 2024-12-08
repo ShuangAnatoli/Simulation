@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta property="og:title" content="WebGL Fire Particle Demo"/>
+    <meta property="og:url" content="http://ethanhjennings.github.io/webgl-fire-particles/"/>
+    <meta property="og:image" content="http://ethanhjennings.github.io/webgl-fire-particles/screenshots/fire.png"/>
+    <title>WebGL Fire Particle Demo</title>
+    <link type="text/css" href="css/main.css" rel="stylesheet" />
+  </head>
+  <body>
+      <script type="text/javascript" src="js_helpers/webgl-utils.js"></script>
+      <script type="text/javascript" src="js_helpers/mathHelper.js"></script>
+      <script type="text/javascript" src="js_helpers/otherHelper.js"></script>
+      <script type="text/javascript" src="js_helpers/perlin.js"></script>
+      
+      <script src="js/webgl-obj-loader.min.js"></script>
+      <script type="text/javascript" src="js/main.js"></script>
+
+      <div class="containerDiv">
+        <div class="leftPanel"> <canvas id="canvas" width="600" height="600"></canvas> </div>
+        <div class="rightPanel">
+          <h3>Particle Settings</h3>
+
+          <label for="fireEmitRate">Emit Rate</label>
+          <input id="fireEmitRate" class="range" type="range" style="width:300px;">
+          <div id="fireEmitRateVal" class="valueIndicator"></div> particles/second<br>
+
+          <label for="fireSize">Particle Size</label>
+          <input id="fireSize" class="range" type="range">
+          <div id="fireSizeVal" class="valueIndicator"></div> pixels<br>
+
+          <label for="fireSizeVariance">Particle Size Variance</label>
+          <input id="fireSizeVariance" class="range" type="range">
+          <div id="fireSizeVarianceVal" class="valueIndicator"></div>%<br>
+
+          <label for="fireEmitAngleVariance">Emit Angle Variance</label>
+          <input id="fireEmitAngleVariance" class="range" type="range">
+          <div id="fireEmitAngleVarianceVal" class="valueIndicator"></div> radians<br>
+
+          <label for="fireSpeed">Speed</label>
+          <input id="fireSpeed" class="range" type="range">
+          <div id="fireSpeedVal" class="valueIndicator"></div> pixels/second<br>
+
+          <label for="fireSpeedVariance">Speed Variance</label>
+          <input id="fireSpeedVariance" class="range" type="range">
+          <div id="fireSpeedVarianceVal" class="valueIndicator"></div>%<br>
+
+          <label for="fireDeathSpeed">Death Speed</label>
+          <input id="fireDeathSpeed" class="range" type="range"></input>
+          <div id="fireDeathSpeedVal" class="valueIndicator"></div> alpha/second<br>
+
+          <label for="fireTriangleness">Triangleness</label>
+          <input id="fireTriangleness" class="range" type="range"></input>
+          <div id="fireTrianglenessVal" class="valueIndicator"></div><br>
+
+          <div style="line-height: 64px;">
+          <label for="fireTexture">Texture</label>
+          <select id="fireTexture" class="textureComboBox"></select> 
+          <img style="display:inline-block; vertical-align: middle;" id="fireTextureVal" width="64" height="64" src="textures/gradient.png"></img><br>
+          </div>
+
+          <label for="fireTextureColorize">Colorize Texture</label>
+          <input id="fireTextureColorize" type="checkbox" checked></input><br>
+
+          <div style="line-height: 64px;">
+          <label for="fireTextureHue">Hue</label>
+          <input id="fireTextureHue" class="range" type="range"></input>
+          <div id="fireTextureHueVal" style="width:64px; height: 64px; display:inline-block; background-color:white;">4</div><br>
+          </div>
+
+          <label for="fireTextureHueVariance">Hue Variance</label>
+          <input id="fireTextureHueVariance" class="range" type="range"></input>
+          <div id="fireTextureHueVarianceVal" class="valueIndicator"></div>degrees<br>
+
+          <label for="sparks">Enable Sparks</label>
+          <input id="sparks" type="checkbox" checked></input><br>
+
+          <label for="wind">Enable Wind</label>
+          <input id="wind" type="checkbox" checked></input><br><br>
+
+          <label for="omnidirectionalWind">Enable Omnidirectional Wind</label>
+          <input id="omnidirectionalWind" type="checkbox"></input><br><br>
+
+          <label for="windTurbulance">Wind Turbulance</label>
+          <input id="windTurbulance" class="range" type="range"></input>
+          <div id="windTurbulanceVal" class="valueIndicator"></div><br><br>
+
+          <label for="windStrength">Wind Strength</label>
+          <input id="windStrength" class="range" type="range"></input>
+          <div id="windStrengthVal" class="valueIndicator"></div><br>
+        </div>
+      </div>
+
+      <div class="footer">
+      <div id="fps"></div><div id="numParticles"></div>
+      </div>
+  </body>
+</html>

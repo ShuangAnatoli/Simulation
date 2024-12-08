@@ -1,0 +1,124 @@
+// Add WebGL OBJ Loader script (assumes webgl-obj-loader is included)
+OBJ = require('webgl-obj-loader');
+
+let cylinderMesh;
+
+// Load and parse the OBJ file
+function loadOBJ(gl, url) {
+  return fetch(url)
+    .then(response => response.text())
+    .then(data => {
+      const mesh = new OBJ.Mesh(data);
+      OBJ.initMeshBuffers(gl, mesh);
+      return mesh;
+    })
+    .catch(err => console.error("Error loading OBJ file:", err));
+}
+
+// Render the OBJ model
+function renderOBJ(gl, mesh, program, modelViewMatrix) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
+  gl.vertexAttribPointer(positionAttrib, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(positionAttrib);
+
+  if (mesh.textureBuffer) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.textureBuffer);
+    gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(textureCoordAttribute);
+  }
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
+  gl.vertexAttribPointer(normalAttrib, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(normalAttrib);
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+
+  const uModelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
+  gl.uniformMatrix4fv(uModelViewMatrix, false, modelViewMatrix);
+
+  gl.drawElements(gl.TRIANGLES, mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+// Update fire particle emission to align with the cylinder's top
+function createFireParticle(emitCenter) {
+  const size = randomSpread(options.fireSize, options.fireSize * (options.fireSizeVariance / 100.0));
+  const speed = randomSpread(options.fireSpeed, options.fireSpeed * options.fireSpeedVariance / 100.0);
+  const color = options.fireTextureColorize
+    ? HSVtoRGB(convertHue(randomSpread(options.fireTextureHue, options.fireTextureHueVariance)), 1.0, 1.0)
+    : { r: 1.0, g: 1.0, b: 1.0, a: 0.5 };
+  color.a = 0.5;
+
+  // Emit particles at the top of the cylinder
+  const topOfCylinder = { x: canvas.width / 2, y: canvas.height / 2 - 150 }; // Adjust Y based on cylinder height
+  const particle = {
+    pos: random2DVec(topOfCylinder, options.fireEmitPositionSpread),
+    vel: scaleVec(randomUnitVec(Math.PI / 2, options.fireEmitAngleVariance), speed),
+    size: { width: size, height: size },
+    color: color,
+  };
+  fireParticles.push(particle);
+}
+
+// Main function with OBJ file integration
+async function main() {
+  canvas = document.getElementById("canvas");
+  gl = getWebGLContext(canvas);
+
+  if (!gl) {
+    return;
+  }
+
+  loadAllTextures();
+
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+    new Uint8Array([255, 0, 0, 255])); // Red placeholder texture
+
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+  vertexBuffer = gl.createBuffer();
+  colorBuffer = gl.createBuffer();
+  squareTextureCoordinateVertices = gl.createBuffer();
+
+  // Load and parse cylinder.obj
+  cylinderMesh = await loadOBJ(gl, "cylinder.obj");
+
+  const vertexShader = await loadShader(gl, "js/vertex-shader.js", gl.VERTEX_SHADER);
+  const fragmentShader = await loadShader(gl, "js/fragment-shader.js", gl.FRAGMENT_SHADER);
+
+  const program = createProgram(gl, [vertexShader, fragmentShader]);
+  gl.useProgram(program);
+
+  positionAttrib = gl.getAttribLocation(program, "a_position");
+  gl.enableVertexAttribArray(positionAttrib);
+
+  textureCoordAttribute = gl.getAttribLocation(program, "a_texture_coord");
+  gl.enableVertexAttribArray(textureCoordAttribute);
+
+  normalAttrib = gl.getAttribLocation(program, "a_normal");
+  gl.enableVertexAttribArray(normalAttrib);
+
+  resolutionLocation = gl.getUniformLocation(program, "u_resolution");
+  textureSamplerLocation = gl.getUniformLocation(program, "u_sampler");
+
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.enable(gl.BLEND);
+
+  // Start the animation loop
+  function render() {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Render cylinder
+    const modelViewMatrix = mat4.create();
+    mat4.translate(modelViewMatrix, modelViewMatrix, [0, -150, -500]); // Adjust position as needed
+    mat4.scale(modelViewMatrix, modelViewMatrix, [100, 100, 100]); // Scale to fit
+    renderOBJ(gl, cylinderMesh, program, modelViewMatrix);
+
+    // Render fire particles
+    drawRects(fireParticles);
+    if (options.sparks) drawRects(sparkParticles);
+  }
+
+  animloop(); // Trigger animation
+}
