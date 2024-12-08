@@ -3,9 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta property="og:title" content="WebGL Fire Particle Demo"/>
-    <meta property="og:url" content="http://ethanhjennings.github.io/webgl-fire-particles/"/>
-    <meta property="og:image" content="http://ethanhjennings.github.io/webgl-fire-particles/screenshots/fire.png"/>
-    <title>WebGL Fire Particle Demo</title>
+    <title>Fire Simulation</title>
     <link type="text/css" href="css/main.css" rel="stylesheet" />
   </head>
   <body>
@@ -13,13 +11,13 @@
       <script type="text/javascript" src="js_helpers/mathHelper.js"></script>
       <script type="text/javascript" src="js_helpers/otherHelper.js"></script>
       <script type="text/javascript" src="js_helpers/perlin.js"></script>
-      
+      <script src="js/glMatrix-0.9.5.js"></script>
       <script src="js/webgl-obj-loader.min.js"></script>
       <script type="text/javascript" src="js/main.js"></script>
 
       <div class="containerDiv">
-        <div class="leftPanel"> <canvas id="canvas" width="600" height="600"></canvas> </div>
-        <div class="rightPanel">
+        <div class="leftPanel"> <canvas id="canvas" width="1000" height="600"></canvas> </div>
+        <div class="rightPanel" hidden>
           <h3>Particle Settings</h3>
 
           <label for="fireEmitRate">Emit Rate</label>
@@ -92,7 +90,7 @@
         </div>
       </div>
 
-      <div class="footer">
+      <div class="footer" hidden>
       <div id="fps"></div><div id="numParticles"></div>
       </div>
   </body>

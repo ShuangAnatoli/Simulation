@@ -1,4 +1,3 @@
-
 var options = {
   // some of these options are not actually available in the UI to save visual space
   fireEmitPositionSpread: {x:100,y:20},
@@ -70,45 +69,6 @@ images = [];
 textures = [];
 currentTextureIndex = 2;
 
-let cylinderMesh;
-
-// Load and parse the OBJ file
-function loadOBJ(gl, url) {
-  return fetch(url)
-    .then(response => response.text())
-    .then(data => {
-      const mesh = new OBJ.Mesh(data);
-      OBJ.initMeshBuffers(gl, mesh);
-      console.log("Loaded OBJ mesh:", mesh);
-      return mesh;
-    })
-    .catch(err => console.error("Error loading OBJ file:", err));
-}
-
-// Render the OBJ model
-function renderOBJ(gl, mesh, program, modelViewMatrix) {
-  gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
-  gl.vertexAttribPointer(positionAttrib, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(positionAttrib);
-
-  if (mesh.textureBuffer) {
-    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.textureBuffer);
-    gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(textureCoordAttribute);
-  }
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
-  gl.vertexAttribPointer(normalAttrib, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(normalAttrib);
-
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
-
-  const uModelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
-  gl.uniformMatrix4fv(uModelViewMatrix, false, modelViewMatrix);
-
-  gl.drawElements(gl.TRIANGLES, mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-}
-
 function loadTexture(textureName,index) {
   textures[index] = gl.createTexture();
   images[index] = new Image();
@@ -153,21 +113,23 @@ fireParticles = [];
 sparkParticles = [];
 
 function createFireParticle(emitCenter) {
-  const size = randomSpread(options.fireSize, options.fireSize * (options.fireSizeVariance / 100.0));
-  const speed = randomSpread(options.fireSpeed, options.fireSpeed * options.fireSpeedVariance / 100.0);
-  const color = options.fireTextureColorize
-    ? HSVtoRGB(convertHue(randomSpread(options.fireTextureHue, options.fireTextureHueVariance)), 1.0, 1.0)
-    : { r: 1.0, g: 1.0, b: 1.0, a: 0.5 };
-  color.a = 0.5;
-
-  // Emit particles at the top of the cylinder
-  const topOfCylinder = { x: canvas.width / 2, y: canvas.height / 2 - 150 }; // Adjust Y based on cylinder height
-  const particle = {
-    pos: random2DVec(topOfCylinder, options.fireEmitPositionSpread),
-    vel: scaleVec(randomUnitVec(Math.PI / 2, options.fireEmitAngleVariance), speed),
-    size: { width: size, height: size },
+  var size = randomSpread(options.fireSize,options.fireSize*(options.fireSizeVariance/100.0));
+  var speed = randomSpread(options.fireSpeed,options.fireSpeed*options.fireSpeedVariance/100.0);
+  var color = {};
+  if (!options.fireTextureColorize)
+    color = {r:1.0,g:1.0,b:1.0,a:0.5};
+  else {
+    var hue = randomSpread(options.fireTextureHue,options.fireTextureHueVariance);
+    color = HSVtoRGB(convertHue(hue),1.0,1.0);
+    color.a = 0.5;
+  }
+  var particle = {
+    pos: random2DVec(emitCenter,options.fireEmitPositionSpread),
+    vel: scaleVec(randomUnitVec(Math.PI/2,options.fireEmitAngleVariance),speed),
+    size: {width:size,
+           height:size},
     color: color,
-  };
+};
   fireParticles.push(particle);
 }
 
@@ -275,14 +237,11 @@ async function main() {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
               new Uint8Array([255, 0, 0, 255])); // red
 
-  gl.clearColor(0.0, 0.0, 0.3, 1.0);
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
   vertexBuffer = gl.createBuffer();
   colorBuffer = gl.createBuffer();
   squareTextureCoordinateVertices = gl.createBuffer();
-
-  // Load and parse cylinder.obj
-  cylinderMesh = await loadOBJ(gl, "cylinder.obj");
 
   // setup GLSL program
   const vertexShader = await loadShader(gl, "js/vertex-shader.js", gl.VERTEX_SHADER);
@@ -493,20 +452,16 @@ function logic() {
 }
 
 function render() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  // Render cylinder
-  const modelViewMatrix = mat4.create();
-  mat4.translate(modelViewMatrix, modelViewMatrix, [0, -50, -300]); // Move it closer to the camera
-  mat4.scale(modelViewMatrix, modelViewMatrix, [50, 50, 50]); 
-  renderOBJ(gl, cylinderMesh, program, modelViewMatrix);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  
+  // set the resolution
+  gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+  gl.uniform1i(textureSamplerLocation, 0);
 
-  // Render fire particles
   drawRects(fireParticles);
-  if (options.sparks) drawRects(sparkParticles);
-
-  gl.enable(gl.DEPTH_TEST);
-  gl.depthFunc(gl.LEQUAL);
+  if (options.sparks)
+    drawRects(sparkParticles);
 }
 
 rectArray = [];
